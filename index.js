@@ -1,18 +1,18 @@
 // Notes
-// Collections: 
+// Collections:
 // 1. Posts
 // 2. Users
 // 3. Addresses
 
 // Implement requirements
-const express = require('express')
-const MongoUtil = require('./MongoUtil')
+const express = require('express');
+const MongoUtil = require('./MongoUtil');
 const mongoUrl = process.env.MONGO_URL;
 const ObjectId = require('mongodb').ObjectId;
-const cors = require('cors')
+const cors = require('cors');
 
 // Set up express app
-let app = express()
+let app = express();
 
 // Add in app.use for json and cors
 app.use(express.json());
@@ -20,23 +20,44 @@ app.use(cors());
 
 // Main api
 main = async () => {
-    const DBNAME = 'msw-keeposted';
-    let db = await MongoUtil.connect(mongoUrl, DBNAME);
+  const DBNAME = 'msw-keeposted';
+  let db = await MongoUtil.connect(mongoUrl, DBNAME);
 
-    // GET
-    app.get('/posts', async (req, res) => {
-        try {
-            let result = await db.collection('posts').find({}).toArray();
-            res.send(result)
-        } catch (e) {
-            res.send('Apologies, API was not consumed successfully.')
-        }
-    })
-    // POST
-    // DELETE
-    //PUT
+  // GET
+  app.get('/posts', async (req, res) => {
+    try {
+      let result = await db.collection('posts').find({}).toArray();
+      res.status(200);
+      res.send(result);
+    } catch (e) {
+      res.status(500);
+      res.send({
+        message: 'Unable to consume API successfully.',
+      });
+      console.log(e);
+    }
+  });
 
-}
+  // POST
+  app.get('/posts', async (req, res) => {
+    try {
+      let result = await db.collection('posts').insertOne({
+        // Insert posts
+      });
+    } catch (e) {
+      res.status(500);
+      res.send({
+        message: 'Unable to consume API successfully.',
+      });
+      console.log(e);
+    }
+  });
+
+  // DELETE
+  //PUT
+};
 main();
 
-app.listen(process.env.PORT || 3000, () => console.log('Server is running on port 3000 ...'));
+app.listen(process.env.PORT || 3000, () =>
+  console.log('Server is running on port 3000 ...')
+);
