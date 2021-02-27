@@ -1,3 +1,9 @@
+// Notes
+// Collections: 
+// 1. Posts
+// 2. Users
+// 3. Addresses
+
 // Implement requirements
 const express = require('express')
 const MongoUtil = require('./MongoUtil')
@@ -17,18 +23,18 @@ main = async () => {
     const DBNAME = 'msw-keeposted';
     let db = await MongoUtil.connect(mongoUrl, DBNAME);
 
-// GET
-app.get('/posts', async (req,res) => {
-    try {
-        let result = await db.collection('posts').find({}).toArray();
-        res.send(result)
-    } catch (e) {
-        res.send('Apologies, API was not consumed successfully.')
-    }
-})
-// POST
-// DELETE
-//PUT
+    // GET
+    app.get('/posts', async (req, res) => {
+        try {
+            let result = await db.collection('posts').find({}).toArray();
+            res.send(result)
+        } catch (e) {
+            res.send('Apologies, API was not consumed successfully.')
+        }
+    })
+    // POST
+    // DELETE
+    //PUT
 
 }
 main();
