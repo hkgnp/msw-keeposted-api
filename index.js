@@ -10,6 +10,8 @@ const MongoUtil = require('./MongoUtil');
 const mongoUrl = process.env.MONGO_URL;
 const ObjectId = require('mongodb').ObjectId;
 const cors = require('cors');
+const S3_BUCKET = process.env.S3_BUCKET;
+aws.config.region = 'ap-southeast-1';
 
 // Set up express app
 let app = express();
@@ -26,7 +28,7 @@ main = async () => {
   // GET
   app.get('/posts', async (req, res) => {
     try {
-      let result = await db.collection('posts').find({}).toArray();
+      let result = await db.collection('post-details').find({}).toArray();
       res.status(200);
       res.send(result);
     } catch (e) {
@@ -38,12 +40,48 @@ main = async () => {
     }
   });
 
+  // GET IMAGES FROM S3
+  app.get('/sign-s3', (req, res) => {
+    const s3 = new aws.S3();
+    const fileName = req.query['file-name'];
+    const fileType = req.query['file-type'];
+    const s3Params = {
+      Bucket: S3_BUCKET,
+      Key: fileName,
+      Expires: 60,
+      ContentType: fileType,
+      ACL: 'public-read',
+    };
+
+    s3.getSignedUrl('putObject', s3Params, (err, data) => {
+      if (err) {
+        console.log(err);
+        return res.end();
+      }
+      const returnData = {
+        signedRequest: data,
+        url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`,
+      };
+      res.write(JSON.stringify(returnData));
+      res.end();
+    });
+  });
+
   // POST
   app.get('/posts', async (req, res) => {
+    let title = req.body.title;
+    let category = req.body.category;
+    let description = req.body.description;
+
     try {
-      let result = await db.collection('posts').insertOne({
-        // Insert posts
+      let result = await db.collection('post-details').insertOne({
+        title: title,
+        category: category,
+        description: description,
+        location: location,
       });
+      res.status(200);
+      res.send(result);
     } catch (e) {
       res.status(500);
       res.send({
@@ -58,6 +96,6 @@ main = async () => {
 };
 main();
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log('Server is running on port 3000 ...')
+app.listen(process.env.PORT || 7000, () =>
+  console.log('Server is running on port 7000 ...')
 );
