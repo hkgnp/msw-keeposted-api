@@ -47,7 +47,7 @@ let main = async () => {
   let db = await MongoUtil.connect(mongoUrl, DBNAME);
 
   // POST
-  app.get('/posts', async (req, res) => {
+  app.post('/posts', async (req, res) => {
     let { title, category, description } = req.body;
 
     try {
