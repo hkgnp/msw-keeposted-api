@@ -10,7 +10,9 @@ const MongoUtil = require('./MongoUtil');
 const mongoUrl = process.env.MONGO_URL;
 const ObjectId = require('mongodb').ObjectId;
 const cors = require('cors');
-const S3_BUCKET = process.env.S3_BUCKET;
+const aws = require('aws-sdk');
+const accessKeyId = process.env.S3_ACCESS_KEY;
+const secretAccessKey = process.env.S3_ACCESS_SECRET;
 aws.config.region = 'ap-southeast-1';
 
 // Set up express app
@@ -20,80 +22,67 @@ let app = express();
 app.use(express.json());
 app.use(cors());
 
+const s3 = new aws.S3({
+  region: 'ap-southeast-1',
+  accessKeyId: accessKeyId,
+  secretAccessKey: secretAccessKey,
+});
+
 // Main api
-main = async () => {
-  const DBNAME = 'msw-keeposted';
-  let db = await MongoUtil.connect(mongoUrl, DBNAME);
-
-  // GET
-  app.get('/posts', async (req, res) => {
-    try {
-      let result = await db.collection('post-details').find({}).toArray();
-      res.status(200);
-      res.send(result);
-    } catch (e) {
-      res.status(500);
-      res.send({
-        message: 'Unable to consume API successfully.',
-      });
-      console.log(e);
-    }
-  });
-
-  // GET IMAGES FROM S3
-  app.get('/sign-s3', (req, res) => {
-    const s3 = new aws.S3();
-    const fileName = req.query['file-name'];
-    const fileType = req.query['file-type'];
-    const s3Params = {
-      Bucket: S3_BUCKET,
-      Key: fileName,
+let main = async () => {
+  app.get('/uploader/sign', async (req, res) => {
+    const { key, type } = req.query;
+    const url = s3.getSignedUrl('putObject', {
+      Bucket: 'msw-keeposted-images',
+      Key: key,
       Expires: 60,
-      ContentType: fileType,
-      ACL: 'public-read',
-    };
-
-    s3.getSignedUrl('putObject', s3Params, (err, data) => {
-      if (err) {
-        console.log(err);
-        return res.end();
-      }
-      const returnData = {
-        signedRequest: data,
-        url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`,
-      };
-      res.write(JSON.stringify(returnData));
-      res.end();
+      ContentType: type,
     });
+    res.send({ url });
   });
 
-  // POST
-  app.get('/posts', async (req, res) => {
-    let title = req.body.title;
-    let category = req.body.category;
-    let description = req.body.description;
-
-    try {
-      let result = await db.collection('post-details').insertOne({
-        title: title,
-        category: category,
-        description: description,
-        location: location,
-      });
-      res.status(200);
-      res.send(result);
-    } catch (e) {
-      res.status(500);
-      res.send({
-        message: 'Unable to consume API successfully.',
-      });
-      console.log(e);
-    }
-  });
-
+  // const DBNAME = 'msw-keeposted';
+  // let db = await MongoUtil.connect(mongoUrl, DBNAME);
+  // // GET
+  // app.get('/posts', async (req, res) => {
+  //   try {
+  //     let result = await db.collection('post-details').find({}).toArray();
+  //     res.status(200);
+  //     res.send(result);
+  //   } catch (e) {
+  //     res.status(500);
+  //     res.send({
+  //       message: 'Unable to consume API successfully.',
+  //     });
+  //     console.log(e);
+  //   }
+  // });
+  // // POST
+  // app.get('/posts', async (req, res) => {
+  //   let title = req.body.title;
+  //   let category = req.body.category;
+  //   let description = req.body.description;
+  //   try {
+  //     let result = await db.collection('post-details').insertOne({
+  //       title: title,
+  //       category: category,
+  //       description: description,
+  //       location: location,
+  //     });
+  //     res.status(200);
+  //     res.send(result);
+  //   } catch (e) {
+  //     res.status(500);
+  //     res.send({
+  //       message: 'Unable to consume API successfully.',
+  //     });
+  //     console.log(e);
+  //   }
+  // });
   // DELETE
   //PUT
 };
+
 main();
 
 app.listen(process.env.PORT || 7000, () =>
