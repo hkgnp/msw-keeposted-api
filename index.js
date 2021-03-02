@@ -48,7 +48,7 @@ let main = async () => {
 
   // POST
   app.post('/posts', async (req, res) => {
-    let { title, category, description } = req.body;
+    let { title, category, description, location } = req.body;
 
     try {
       let result = await db.collection('post-details').insertOne({
