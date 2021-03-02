@@ -1,8 +1,4 @@
-// Notes
-// Collections:
-// 1. Posts
-// 2. Users
-// 3. Addresses
+// Post and get ObjectID back and need to send the objectid back to react in order to send the object id. ? state
 
 // Implement requirements
 const express = require('express');
@@ -58,7 +54,7 @@ let main = async () => {
         location: location,
       });
       res.status(200);
-      res.send(result);
+      res.send(result.ops._id);
     } catch (e) {
       res.status(500);
       res.send({
