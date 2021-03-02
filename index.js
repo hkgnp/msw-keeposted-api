@@ -1,4 +1,7 @@
-// Post and get ObjectID back and need to send the objectid back to react in order to send the object id. ? state
+// 1. When user clicks submit, Mongo API to 'post-details' is triggered and form body (except media) is sent to Mongo.
+// 2. Object ID is returned.
+// 3. Use Object ID to form the filename of the file to upload to S3.
+// 4. Use S3 URL of file to trigger another Mongo API to 'media' collections.
 
 //////////////////////////////////////////////////////////
 //////////////////// BASIC SETUP /////////////////////////
@@ -71,7 +74,11 @@ let main = async () => {
                 location: location,
             });
             res.status(200);
-            res.send(result.insertedId);
+            // res.send(result.insertId)
+            // res.send({
+            //     "_id": 'ObjectId("' + result.insertedId + '")'
+            // });
+            res.send('ObjectId("' + result.insertedId + '")')
             
         } catch (e) {
             res.status(500);
