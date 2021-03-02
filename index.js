@@ -30,8 +30,10 @@ const s3 = new aws.S3({
 
 // Main api
 let main = async () => {
+  // API to get the signedUrl from S3
   app.get('/uploader/sign', async (req, res) => {
-    const { key, type } = req.query;
+    const key = req.query.key;
+    const type = req.query.type;
     const url = s3.getSignedUrl('putObject', {
       Bucket: 'msw-keeposted-images',
       Key: key,
@@ -41,44 +43,46 @@ let main = async () => {
     res.send({ url });
   });
 
-  // const DBNAME = 'msw-keeposted';
-  // let db = await MongoUtil.connect(mongoUrl, DBNAME);
-  // // GET
-  // app.get('/posts', async (req, res) => {
-  //   try {
-  //     let result = await db.collection('post-details').find({}).toArray();
-  //     res.status(200);
-  //     res.send(result);
-  //   } catch (e) {
-  //     res.status(500);
-  //     res.send({
-  //       message: 'Unable to consume API successfully.',
-  //     });
-  //     console.log(e);
-  //   }
-  // });
-  // // POST
-  // app.get('/posts', async (req, res) => {
-  //   let title = req.body.title;
-  //   let category = req.body.category;
-  //   let description = req.body.description;
-  //   try {
-  //     let result = await db.collection('post-details').insertOne({
-  //       title: title,
-  //       category: category,
-  //       description: description,
-  //       location: location,
-  //     });
-  //     res.status(200);
-  //     res.send(result);
-  //   } catch (e) {
-  //     res.status(500);
-  //     res.send({
-  //       message: 'Unable to consume API successfully.',
-  //     });
-  //     console.log(e);
-  //   }
-  // });
+  const DBNAME = 'msw-keeposted';
+  let db = await MongoUtil.connect(mongoUrl, DBNAME);
+
+  // POST
+  app.get('/posts', async (req, res) => {
+    let { title, category, description } = req.body;
+
+    try {
+      let result = await db.collection('post-details').insertOne({
+        title: title,
+        category: category,
+        description: description,
+        location: location,
+      });
+      res.status(200);
+      res.send(result);
+    } catch (e) {
+      res.status(500);
+      res.send({
+        message: 'Unable to consume API successfully.',
+      });
+      console.log(e);
+    }
+  });
+
+  // GET
+  app.get('/posts', async (req, res) => {
+    try {
+      let result = await db.collection('post-details').find({}).toArray();
+      res.status(200);
+      res.send(result);
+    } catch (e) {
+      res.status(500);
+      res.send({
+        message: 'Unable to consume API successfully.',
+      });
+      console.log(e);
+    }
+  });
+
   // DELETE
   //PUT
 };
