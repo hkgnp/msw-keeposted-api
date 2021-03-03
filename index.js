@@ -9,7 +9,7 @@
 
 // Implement basic requirements
 const express = require('express');
-const cors = require('cors')
+const cors = require('cors');
 
 // For Mongo
 require('dotenv').config(); // Not needed for Heroku
@@ -31,9 +31,9 @@ app.use(express.json());
 app.use(cors());
 
 const s3 = new aws.S3({
-    region: 'ap-southeast-1',
-    accessKeyId: accessKeyId,
-    secretAccessKey: secretAccessKey,
+  region: 'ap-southeast-1',
+  accessKeyId: accessKeyId,
+  secretAccessKey: secretAccessKey,
 });
 
 //////////////////////////////////////////////////////////
@@ -41,77 +41,87 @@ const s3 = new aws.S3({
 //////////////////////////////////////////////////////////
 
 let main = async () => {
-    // API to get the signedUrl from S3
-    app.get('/uploader/sign', async (req, res) => {
-        try {
-            const key = req.query.key;
-            const type = req.query.type;
-            const url = s3.getSignedUrl('putObject', {
-                Bucket: 'msw-keeposted-images',
-                Key: key,
-                Expires: 60,
-                ContentType: type,
-            });
-            res.send({ url });
+  // API to get the signedUrl from S3
+  app.get('/uploader/sign', async (req, res) => {
+    try {
+      const key = req.query.key;
+      const type = req.query.type;
+      const url = s3.getSignedUrl('putObject', {
+        Bucket: 'msw-keeposted-images',
+        Key: key,
+        Expires: 60,
+        ContentType: type,
+      });
+      res.send({ url });
+    } catch (e) {
+      console.log(e);
+    }
+  });
 
-        } catch (e) { console.log(e) }
+  // API to link with MongoDB
+  const DBNAME = 'msw-keeposted';
+  let db = await MongoUtil.connect(mongoUrl, DBNAME);
 
-    });
+  // Collection 'post-details' POST
+  app.post('/posts', async (req, res) => {
+    let { title, category, description, location } = req.body;
 
-    // API to link with MongoDB
-    const DBNAME = 'msw-keeposted';
-    let db = await MongoUtil.connect(mongoUrl, DBNAME);
+    try {
+      let result = await db.collection('post-details').insertOne({
+        title: title,
+        category: category,
+        description: description,
+        location: location,
+      });
+      res.status(200);
+      res.send('ObjectId("' + result.insertedId + '")');
+    } catch (e) {
+      res.status(500);
+      res.send({
+        message: 'Unable to consume API successfully.',
+      });
+      console.log(e);
+    }
+  });
 
-    // POST
-    app.post('/posts', async (req, res) => {
-        let { title, category, description, location } = req.body;
+  // Collection 'post-details' GET
+  app.get('/posts', async (req, res) => {
+    try {
+      let result = await db.collection('post-details').find({}).toArray();
+      res.status(200);
+      res.send(result);
+    } catch (e) {
+      res.status(500);
+      res.send({
+        message: 'Unable to consume API successfully.',
+      });
+      console.log(e);
+    }
+  });
 
-        try {
-            let result = await db.collection('post-details').insertOne({
-                title: title,
-                category: category,
-                description: description,
-                location: location,
-            });
-            res.status(200);
-            // res.send(result.insertId)
-            // res.send({
-            //     "_id": 'ObjectId("' + result.insertedId + '")'
-            // });
-            res.send('ObjectId("' + result.insertedId + '")')
-            
-        } catch (e) {
-            res.status(500);
-            res.send({
-                message: 'Unable to consume API successfully.',
-            });
-            console.log(e);
-        }
-    });
+  // DELETE
+  //PUT
 
-    // GET
-    app.get('/posts', async (req, res) => {
-        try {
-            let result = await db.collection('post-details').find({}).toArray();
-            res.status(200);
-            res.send(result);
-        } catch (e) {
-            res.status(500);
-            res.send({
-                message: 'Unable to consume API successfully.',
-            });
-            console.log(e);
-        }
-    });
+  // Collection: 'media' POST
+  app.post('/media', async (req, res) => {
+    let { postId, mediaUrl } = req.body;
 
-    // DELETE
-    //PUT
+    try {
+      let result = await db.collection('media').insertOne({
+        postId: postId,
+        mediaUrl: mediaUrl,
+      });
+      res.status(200);
+      res.send('File uploaded successfully');
+    } catch (e) {
+      console.log(e);
+    }
+  });
+  // Collection: 'media' GET
 };
 
 main();
 
 app.listen(process.env.PORT || 7000, () =>
-    console.log('Server is running on port 7000 ...')
+  console.log('Server is running on port 7000 ...')
 );
-
-
