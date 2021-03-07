@@ -23,12 +23,9 @@ const accessKeyId = process.env.S3_ACCESS_KEY;
 const secretAccessKey = process.env.S3_ACCESS_SECRET;
 aws.config.region = 'ap-southeast-1';
 
-// For bcrypt
-// const bcrypt = require("bcryptjs");
-
-
 // import routes
-const userRegistration = require("./user");
+const userRegistration = require("./routes/users");
+const postReviews = require("./routes/reviews")
 
 // Set up express app
 let app = express();
@@ -127,41 +124,11 @@ let main = async () => {
     });
     // Collection: 'media' GET
 
-
+    // Route for user registration
     app.use("/user", userRegistration);
-
-    // Collection: 'users' POST
-    // app.post('/register', async (req, res) => {
-    //     const { name, email, password } = req.body;
-    //     const duplicateEmail = await db.collection('users').findOne({ email: email });
-
-    //     // Check for duplicate email
-    //     if (duplicateEmail) {
-    //         res.status(400)
-    //         res.send("Username has already been taken")
-    //     }
-
-    //     // Hash password before sending to Mongo
-    //     const salt = await bcrypt.genSalt(8);
-    //     const hashPassword = await bcrypt.hash(password, salt);
-
-    //     // Actually register
-    //     try {
-    //         const savedUser = await db.collection('users').insertOne({
-    //             name: name,
-    //             email: email,
-    //             password: hashPassword,
-    //             date: new Date(),
-    //         });
-    //         res.status(200);
-    //         res.json({ error: null, data: savedUser });
-    //     } catch (e) {
-    //         res.send(e);
-    //         console.log(e);
-    //     }
-
-
-    // });
+    
+    // Route for posting reviews
+    app.use("/posts", postReviews)
 };
 
 main();
