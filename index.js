@@ -128,7 +128,7 @@ let main = async () => {
     app.use("/user", userRegistration);
     
     // Route for posting reviews
-    app.use("/posts", postReviews)
+    app.use("/posts", postReviews);
 };
 
 main();
