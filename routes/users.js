@@ -12,7 +12,6 @@ const ObjectId = require('mongodb').ObjectId;
 
 // Router for user registration
 router.post("/register", async (req, res) => {
-    
     // API to link with MongoDB
     const DBNAME = 'msw-keeposted';
     let db = await MongoUtil.connect(mongoUrl, DBNAME);
@@ -31,21 +30,50 @@ router.post("/register", async (req, res) => {
 
     // Actually register user
     try {
-        await db.collection('users').insertOne({
+        let result = await db.collection('users').insertOne({
             name: name,
             email: email,
             password: hashPassword,
             date: new Date(),
         });
         res.status(200);
+        res.send(result)
     } catch (e) {
-            res.status(500);
-            res.send({
-                message: 'Unable to complete registration. Please try again.',
-            });
-            console.log(e);
+        res.status(500);
+        res.send({
+            message: 'Unable to complete registration. Please try again.',
+        });
+        console.log(e);
     }
 
 });
+
+// Router for login
+router.post("/login", async (req, res) => {
+
+    // API to link with MongoDB
+    const DBNAME = 'msw-keeposted';
+    let db = await MongoUtil.connect(mongoUrl, DBNAME);
+    const { name, email, password } = req.body;
+
+    // Check for existing email in Mongo
+    const emailExists = await db.collection('users').findOne({ email: email });
+    if (!emailExists) {
+        res.status(400)
+        res.send("Username does not exist.")
+    }
+
+    // Validate password
+    const validPassword = await bcrypt.compare(password, emailExists.password)
+
+    // Login user if password is correct
+    if (!validPassword) {
+        res.status(400);
+        res.send("Password is wrong.")
+    } else {
+        res.status(200);
+        res.send("Login successful.")
+    }
+})
 
 module.exports = router;

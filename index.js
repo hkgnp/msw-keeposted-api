@@ -124,7 +124,7 @@ let main = async () => {
     });
     // Collection: 'media' GET
 
-    // Route for user registration
+    // Route for user registration / login
     app.use("/user", userRegistration);
     
     // Route for posting reviews
