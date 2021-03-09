@@ -115,6 +115,7 @@ let main = async () => {
             let result = await db.collection('media').insertOne({
                 postId: postId,
                 mediaUrl: mediaUrl,
+                date: new Date()
             });
             res.status(200);
             res.send('File uploaded successfully');
