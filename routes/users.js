@@ -4,6 +4,9 @@ const router = require("express").Router();
 // Set up bcrypt
 const bcrypt = require("bcryptjs");
 
+// Set up JWT
+const jwt = require("jsonwebtoken");
+
 // Set up Mongo
 require('dotenv').config(); // Not needed for Heroku
 const mongoUrl = process.env.MONGO_URL;
@@ -57,23 +60,36 @@ router.post("/login", async (req, res) => {
     const { name, email, password } = req.body;
 
     // Check for existing email in Mongo
-    const emailExists = await db.collection('users').findOne({ email: email });
-    if (!emailExists) {
+    const user = await db.collection('users').findOne({ email: email });
+    if (!user) {
         res.status(400)
         res.send("Username does not exist.")
     }
 
     // Validate password
-    const validPassword = await bcrypt.compare(password, emailExists.password)
+    const validPassword = await bcrypt.compare(password, user.password)
 
     // Login user if password is correct
     if (!validPassword) {
         res.status(400);
         res.send("Password is wrong.")
     } else {
-        res.status(200);
-        res.send("Login successful.")
-    }
+        // Create jwt
+        const token = jwt.sign({
+            // Payload data
+            username: user.name,
+            id: user._id
+        }, process.env.TOKEN_SECRET
+        );
+
+        // Send the jwt as a response header
+        res.header("auth-token", token).json({
+            error: null,
+            date: {
+                token,
+            }
+        })
+    };
 })
 
 module.exports = router;
