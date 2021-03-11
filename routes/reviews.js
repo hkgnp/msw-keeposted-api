@@ -18,7 +18,7 @@ router.post('/get', async (req, res) => {
     const result = await db
       .collection('users')
       .find({
-        _id: ObjectId(_id),
+        postId: ObjectId(_id),
       })
       .toArray();
     res.status(200);
