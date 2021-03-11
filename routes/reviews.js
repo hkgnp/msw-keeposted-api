@@ -16,7 +16,7 @@ router.post('/get', async (req, res) => {
   // Get comments based on filter
   try {
     const result = await db
-      .collection('users')
+      .collection('reviews')
       .find({
         postId: ObjectId(_id),
       })
