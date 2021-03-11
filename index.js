@@ -25,7 +25,7 @@ aws.config.region = 'ap-southeast-1';
 
 // import routes
 const userRegistration = require('./routes/users');
-const postReviews = require('./routes/reviews');
+const resourceReviews = require('./routes/reviews');
 
 // Set up express app
 let app = express();
@@ -129,7 +129,7 @@ let main = async () => {
   app.use('/user', userRegistration);
 
   // Route for posting reviews
-  app.use('/posts', postReviews);
+  app.use('/reviews', resourceReviews);
 };
 
 main();
