@@ -112,8 +112,8 @@ let main = async () => {
     let { postId, mediaUrl } = req.body;
 
     try {
-      let result = await db.collection('media').insertOne({
-        postId: postId,
+      await db.collection('media').insertOne({
+        postId: ObjectId(postId),
         mediaUrl: mediaUrl,
         date: new Date(),
       });
