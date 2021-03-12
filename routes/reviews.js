@@ -6,10 +6,10 @@ require('dotenv').config(); // Not needed for Heroku
 const mongoUrl = process.env.MONGO_URL;
 const MongoUtil = require('../MongoUtil');
 const ObjectId = require('mongodb').ObjectId;
+const DBNAME = 'msw-keeposted';
 
 // Router for getting comments based on Objectid
 router.post('/get', async (req, res) => {
-  const DBNAME = 'msw-keeposted';
   let db = await MongoUtil.connect(mongoUrl, DBNAME);
   const { _id } = req.body;
 
@@ -26,8 +26,26 @@ router.post('/get', async (req, res) => {
   } catch (e) {
     res.status(500);
     res.send({
-      message: 'Unable to find comments.',
+      message: 'Unable to find reviews.',
     });
+    console.log(e);
+  }
+});
+
+router.post('/post', async (req, res) => {
+  let db = await MongoUtil.connect(mongoUrl, DBNAME);
+  const { name, review, postId } = req.body;
+
+  try {
+    await db.collection('reviews').insertOne({
+      name: name,
+      review: review,
+      date: new Date(),
+      postId: postId,
+    });
+    res.status(200);
+    res.send('Review submitted successfully');
+  } catch (e) {
     console.log(e);
   }
 });
