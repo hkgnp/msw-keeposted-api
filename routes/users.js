@@ -50,6 +50,24 @@ router.post('/register', async (req, res) => {
   }
 });
 
+//Router for Update
+router.put('/update', async (req, res) => {
+  const { name, email, id } = req.body;
+  await db.collection('users').updateOne(
+    {
+      _id: ObjectId(id),
+    },
+    {
+      $set: {
+        name: name,
+        email: email,
+      },
+    }
+  );
+});
+
+// Router for Delete
+
 // Router for login
 router.post('/login', async (req, res) => {
   // API to link with MongoDB
