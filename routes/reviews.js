@@ -41,7 +41,7 @@ router.post('/post', async (req, res) => {
       name: name,
       review: review,
       date: new Date(),
-      postId: postId,
+      postId: ObjectId(postId),
     });
     res.status(200);
     res.send('Review submitted successfully');
