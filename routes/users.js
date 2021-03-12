@@ -64,6 +64,7 @@ router.put('/update', async (req, res) => {
       },
     }
   );
+  res.status(200);
 });
 
 // Router for Delete
