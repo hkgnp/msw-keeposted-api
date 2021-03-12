@@ -35,9 +35,9 @@ app.use(express.json());
 app.use(cors());
 
 const s3 = new aws.S3({
-  region: 'ap-southeast-1',
-  accessKeyId: accessKeyId,
-  secretAccessKey: secretAccessKey,
+    region: 'ap-southeast-1',
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey,
 });
 
 //////////////////////////////////////////////////////////
@@ -45,95 +45,132 @@ const s3 = new aws.S3({
 //////////////////////////////////////////////////////////
 
 let main = async () => {
-  // API to get the signedUrl from S3
-  app.get('/uploader/sign', async (req, res) => {
-    try {
-      const key = req.query.key;
-      const type = req.query.type;
-      const url = s3.getSignedUrl('putObject', {
-        Bucket: 'msw-keeposted-images',
-        Key: key,
-        Expires: 60,
-        ContentType: type,
-      });
-      res.send({ url });
-    } catch (e) {
-      console.log(e);
-    }
-  });
+    // API to get the signedUrl from S3
+    app.get('/uploader/sign', async (req, res) => {
+        try {
+            const key = req.query.key;
+            const type = req.query.type;
+            const url = s3.getSignedUrl('putObject', {
+                Bucket: 'msw-keeposted-images',
+                Key: key,
+                Expires: 60,
+                ContentType: type,
+            });
+            res.send({ url });
+        } catch (e) {
+            console.log(e);
+        }
+    });
 
-  // API to link with MongoDB
-  const DBNAME = 'msw-keeposted';
-  let db = await MongoUtil.connect(mongoUrl, DBNAME);
+    // API to link with MongoDB
+    const DBNAME = 'msw-keeposted';
+    let db = await MongoUtil.connect(mongoUrl, DBNAME);
 
-  // Collection 'post-details' POST
-  app.post('/posts', async (req, res) => {
-    let { title, category, description, location } = req.body;
+    // Post resource
+    app.post('/post-resource', async (req, res) => {
+        let { title, category, description, location } = req.body;
 
-    try {
-      let result = await db.collection('post-details').insertOne({
-        title: title,
-        category: category,
-        description: description,
-        location: location,
-        date: new Date(),
-      });
-      res.status(200);
-      res.send('ObjectId("' + result.insertedId + '")');
-    } catch (e) {
-      res.status(500);
-      res.send({
-        message: 'Unable to consume API successfully.',
-      });
-      console.log(e);
-    }
-  });
+        try {
+            let result = await db.collection('post-details').insertOne({
+                title: title,
+                category: category,
+                description: description,
+                location: location,
+                date: new Date(),
+            });
+            res.status(200);
+            res.send(result.insertedId);
+        } catch (e) {
+            res.status(500);
+            res.send({
+                message: 'Unable to consume API successfully.',
+            });
+            console.log(e);
+        }
+    });
 
-  // Collection 'post-details' GET
-  app.get('/posts', async (req, res) => {
-    try {
-      let result = await db.collection('post-details').find({}).toArray();
-      res.status(200);
-      res.send(result);
-    } catch (e) {
-      res.status(500);
-      res.send({
-        message: 'Unable to consume API successfully.',
-      });
-      console.log(e);
-    }
-  });
+    // Collection: 'media' POST
+    app.post('/media', async (req, res) => {
+        let { postId, mediaUrl } = req.body;
+        try {
+            await db.collection('media').insertOne({
+                postId: postId,
+                mediaUrl: mediaUrl,
+                date: new Date(),
+            });
+            res.status(200);
+            res.send('File uploaded successfully');
+        } catch (e) {
+            console.log(e);
+        }
+    });
 
-  // DELETE
-  //PUT
+    // Get all resources
+    app.get('/all-resources', async (req, res) => {
+        try {
+            let result = await db.collection('post-details').find({}).toArray();
+            res.status(200);
+            res.send(result);
+        } catch (e) {
+            res.status(500);
+            res.send({
+                message: 'Unable to consume API successfully.',
+            });
+            console.log(e);
+        }
+    });
 
-  // Collection: 'media' POST
-  app.post('/media', async (req, res) => {
-    let { postId, mediaUrl } = req.body;
+    // Get one resource
+    app.post('/resource', async (req, res) => {
+        const { _id } = req.body;
+        try {
+            let result = await db.collection('post-details').findOne({
+                _id: ObjectId(_id)
+            }, {
+                title: 1,
+                description: 1,
+                location: 1,
+                date: 1,
+                username: 0
+            })
+            res.status(200);
+            res.send(result)
+        } catch (e) {
+            res.status(500);
+            res.send({
+                message: 'Unable to get post'
+            })
+        }
+    })
 
-    try {
-      await db.collection('media').insertOne({
-        postId: ObjectId(postId),
-        mediaUrl: mediaUrl,
-        date: new Date(),
-      });
-      res.status(200);
-      res.send('File uploaded successfully');
-    } catch (e) {
-      console.log(e);
-    }
-  });
-  // Collection: 'media' GET
+    // Delete one resource
+    app.delete('/delete-resource', async (req, res) => {
+        try {
+            let result = await db.collection('post-details').removeOne({});
+            res.status(200);
+            res.send(result);
+        } catch (e) {
+            res.status(500);
+            res.send({
+                message: 'Unable to consume API successfully.',
+            });
+            console.log(e);
+        }
+    });
 
-  // Route for user registration / login
-  app.use('/user', userRegistration);
+    //PUT
 
-  // Route for posting reviews
-  app.use('/reviews', resourceReviews);
+
+
+    // Route for user registration / login
+    app.use('/user', userRegistration);
+
+    // Route for posting reviews
+    app.use('/reviews', resourceReviews);
 };
 
 main();
 
 app.listen(process.env.PORT || 7000, () =>
-  console.log('Server is running on port 7000 ...')
+    console.log('Server is running on port 7000 ...')
 );
