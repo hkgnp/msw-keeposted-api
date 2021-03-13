@@ -18,7 +18,7 @@ router.post('/get', async (req, res) => {
     const result = await db
       .collection('reviews')
       .find({
-        postId: ObjectId(_id),
+        "postId": ObjectId(_id),
       })
       .toArray();
     res.status(200);
@@ -38,10 +38,10 @@ router.post('/post', async (req, res) => {
 
   try {
     await db.collection('reviews').insertOne({
-      name: name,
-      review: review,
-      date: new Date(),
-      postId: ObjectId(postId),
+      "name": name,
+      "review": review,
+      "date": new Date(),
+      "postId": ObjectId(postId),
     });
     res.status(200);
     res.send('Review submitted successfully');

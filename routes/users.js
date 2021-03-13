@@ -35,10 +35,10 @@ router.post('/register', async (req, res) => {
     // Actually register user
     try {
         let result = await db.collection('users').insertOne({
-            name: name,
-            email: email,
-            password: hashPassword,
-            date: new Date(),
+            "name": name,
+            "email": email,
+            "password": hashPassword,
+            "date": new Date(),
         });
         res.status(200);
         res.send(result);
@@ -62,8 +62,8 @@ router.put('/update', async (req, res) => {
         },
         {
             $set: {
-                name: name,
-                email: email,
+                "name": name,
+                "email": email,
             },
         }
     );
@@ -98,9 +98,9 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(
             {
                 // Payload data
-                username: user.email,
-                id: user._id,
-                name: user.name,
+                "username": user.email,
+                "id": user._id,
+                "name": user.name,
             },
             process.env.TOKEN_SECRET
         );

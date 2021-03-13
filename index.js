@@ -68,15 +68,16 @@ let main = async () => {
 
     // Post resource
     app.post('/post-resource', async (req, res) => {
-        let { title, category, description, location } = req.body;
+        let { title, categories, description, location, username } = req.body;
 
         try {
             let result = await db.collection('post-details').insertOne({
-                title: title,
-                category: category,
-                description: description,
-                location: location,
-                date: new Date(),
+                "username": username,
+                "title": title,
+                "categories": categories,
+                "description": description,
+                "location": location,
+                "date": new Date(),
             });
             res.status(200);
             res.send(result.insertedId);
@@ -94,9 +95,9 @@ let main = async () => {
         let { postId, mediaUrl } = req.body;
         try {
             await db.collection('media').insertOne({
-                postId: postId,
-                mediaUrl: mediaUrl,
-                date: new Date(),
+                "postId": postId,
+                "mediaUrl": mediaUrl,
+                "date": new Date(),
             });
             res.status(200);
             res.send('File uploaded successfully');
@@ -108,7 +109,13 @@ let main = async () => {
     // Get all resources
     app.get('/all-resources', async (req, res) => {
         try {
-            let result = await db.collection('post-details').find({}).toArray();
+            let result = await db.collection('post-details').find({}).project({
+                "title": 1,
+                "categories": 1,
+                "description": 1,
+                "location": 1,
+                "date": 1,
+            }).toArray();
             res.status(200);
             res.send(result);
         } catch (e) {
@@ -127,12 +134,38 @@ let main = async () => {
             let result = await db.collection('post-details').findOne({
                 _id: ObjectId(_id)
             }, {
-                title: 1,
-                description: 1,
-                location: 1,
-                date: 1,
-                username: 0
+                "title": 1,
+                "description": 1,
+                "location": 1,
+                "date": 1,
+                "categories": 1,
+                "username": 0
             })
+            res.status(200);
+            res.send(result)
+        } catch (e) {
+            res.status(500);
+            res.send({
+                message: 'Unable to get post'
+            })
+        }
+    })
+
+    // Get resources by username
+    app.post('/resource-by-user', async (req, res) => {
+        const { username } = req.body;
+        try {
+            let result = await db.collection('post-details').find({
+                username: username
+            }, {
+                "title": 1,
+                "description": 1,
+                "location": 1,
+                "date": 1,
+                "username": 1,
+                "categories": 1,
+
+            }).toArray()
             res.status(200);
             res.send(result)
         } catch (e) {
