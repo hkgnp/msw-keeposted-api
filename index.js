@@ -176,6 +176,35 @@ let main = async () => {
         }
     })
 
+    // Get resources by filter
+    app.post('/filter-resource', async (req, res) => {
+        let filter = {};
+        const { categories } = req.body;
+
+        try {
+            let result = await db.collection('post-details').find({
+                "categories": {
+                    $in: [categories]
+                }
+            }, {
+                "title": 1,
+                "description": 1,
+                "location": 1,
+                "date": 1,
+                "username": 0,
+                "categories": 1,
+
+            }).toArray()
+            res.status(200);
+            res.send(result)
+        } catch (e) {
+            res.status(500);
+            res.send({
+                message: 'Unable to get post'
+            })
+        }
+    })
+
     // Delete one resource
     app.delete('/delete-resource', async (req, res) => {
         try {
