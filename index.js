@@ -90,7 +90,7 @@ let main = async () => {
         }
     });
 
-    // Collection: 'media' POST
+    // Post to media
     app.post('/media', async (req, res) => {
         let { postId, mediaUrl } = req.body;
         try {
@@ -246,7 +246,26 @@ let main = async () => {
         } catch (e) {
             res.status(500);
             res.send({
-                message: 'Unable to consume API successfully.',
+                message: 'Unable to delete successfully.',
+            });
+            console.log(e);
+        }
+    });
+
+    // Delete one resource
+    app.delete('/delete-resource', async (req, res) => {
+        const { id } = req.body;
+
+        try {
+            let result = await db.collection('post-details').removeOne({
+                postId: ObjectId(id)
+            });
+            res.status(200);
+            res.send(result);
+        } catch (e) {
+            res.status(500);
+            res.send({
+                message: 'Unable to delete successfully.',
             });
             console.log(e);
         }
