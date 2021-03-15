@@ -106,6 +106,34 @@ let main = async () => {
         }
     });
 
+    // Edit resource
+    app.put('/edit-resource', async (req, res) => {
+        let { title, categories, description, location, username, id } = req.body;
+        try {
+            let result = await db.collection('post-details').updateOne(
+                {
+                    _id: ObjectId(id),
+                },
+                {
+                    $set: {
+                        "username": username,
+                        "title": title,
+                        "categories": categories,
+                        "description": description,
+                        "location": location,
+                    }
+                });
+            res.status(200);
+            res.send(result);
+        } catch (e) {
+            res.status(500);
+            res.send({
+                message: 'Unable to consume API successfully.',
+            });
+            console.log(e);
+        }
+    });
+
     // Get all resources
     app.get('/all-resources', async (req, res) => {
         try {
@@ -207,8 +235,12 @@ let main = async () => {
 
     // Delete one resource
     app.delete('/delete-resource', async (req, res) => {
+        const { id } = req.body;
+
         try {
-            let result = await db.collection('post-details').removeOne({});
+            let result = await db.collection('post-details').removeOne({
+                _id: ObjectId(id)
+            });
             res.status(200);
             res.send(result);
         } catch (e) {
@@ -219,10 +251,6 @@ let main = async () => {
             console.log(e);
         }
     });
-
-    //PUT
-
-
 
     // Route for user registration / login
     app.use('/user', userRegistration);
