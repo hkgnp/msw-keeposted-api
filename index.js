@@ -1,8 +1,3 @@
-// 1. When user clicks submit, Mongo API to 'post-details' is triggered and form body (except media) is sent to Mongo.
-// 2. Object ID is returned.
-// 3. Use Object ID to form the filename of the file to upload to S3.
-// 4. Use S3 URL of file to trigger another Mongo API to 'media' collections.
-
 //////////////////////////////////////////////////////////
 //////////////////// BASIC SETUP /////////////////////////
 //////////////////////////////////////////////////////////
@@ -11,7 +6,7 @@
 const express = require('express');
 const cors = require('cors');
 
-// For Mongo
+// For MongoDB
 require('dotenv').config(); // Not needed for Heroku
 const mongoUrl = process.env.MONGO_URL;
 const MongoUtil = require('./MongoUtil');
