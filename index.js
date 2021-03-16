@@ -63,19 +63,11 @@ let main = async () => {
 
   // Post resource
   app.post('/post-resource', async (req, res) => {
-    let {
-      title,
-      categories,
-      description,
-      location,
-      username,
-      userId,
-    } = req.body;
+    let { title, categories, description, location, userId } = req.body;
 
     try {
       let result = await db.collection('post-details').insertOne({
-        userId: userId,
-        username: username,
+        userId: ObjectId(userId),
         title: title,
         categories: categories,
         description: description,
@@ -111,15 +103,7 @@ let main = async () => {
 
   // Edit resource
   app.put('/edit-resource', async (req, res) => {
-    let {
-      title,
-      categories,
-      description,
-      location,
-      username,
-      id,
-      userId,
-    } = req.body;
+    let { title, categories, description, location, id, userId } = req.body;
     try {
       let result = await db.collection('post-details').updateOne(
         {
@@ -127,8 +111,7 @@ let main = async () => {
         },
         {
           $set: {
-            userId: userId,
-            username: username,
+            userId: ObjectId(userId),
             title: title,
             categories: categories,
             description: description,
@@ -186,7 +169,6 @@ let main = async () => {
           location: 1,
           date: 1,
           categories: 1,
-          username: 0,
           userId: 0,
         }
       );
@@ -208,14 +190,14 @@ let main = async () => {
         .collection('post-details')
         .find(
           {
-            userId: userId,
+            userId: ObjectId(userId),
           },
           {
             title: 1,
             description: 1,
             location: 1,
             date: 1,
-            username: 1,
+            userId: 1,
             categories: 1,
           }
         )
@@ -271,25 +253,6 @@ let main = async () => {
     try {
       let result = await db.collection('post-details').removeOne({
         _id: ObjectId(id),
-      });
-      res.status(200);
-      res.send(result);
-    } catch (e) {
-      res.status(500);
-      res.send({
-        message: 'Unable to delete successfully.',
-      });
-      console.log(e);
-    }
-  });
-
-  // Delete one resource
-  app.delete('/delete-resource', async (req, res) => {
-    const { id } = req.body;
-
-    try {
-      let result = await db.collection('post-details').removeOne({
-        postId: ObjectId(id),
       });
       res.status(200);
       res.send(result);
