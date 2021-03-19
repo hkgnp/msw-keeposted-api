@@ -8,7 +8,12 @@ Note: As this is not a secure database, please do not post any real or sensitive
 
 ### Posts
 
-Users can perform the below transactions for resources, including uploading a picture from their device.
+Users can perform the below transactions for resources, including uploading an image from their device. The following flow is expected upon posting of a resource.
+
+1. Obtained a signed URL from S3
+2. A new resource is inserted into the database.
+3. Retrieve the ObjectId of the new resource.
+4. Use the ObjectId to post the URL of the image file to the database.
 
 ```
 - GET
@@ -35,5 +40,3 @@ Users can perform the below transactions for the registration and logging in of 
 - POST
 - PUT
 ```
-
-## Overview
