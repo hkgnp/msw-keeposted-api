@@ -251,11 +251,13 @@ let main = async () => {
     const { id } = req.body;
 
     try {
-      let result = await db.collection('post-details').removeOne({
+      await db.collection('post-details').removeOne({
         _id: ObjectId(id),
       });
+      await db.collection('media').removeOne({
+        postId: ObjectId(id),
+      });
       res.status(200);
-      res.send(result);
     } catch (e) {
       res.status(500);
       res.send({
