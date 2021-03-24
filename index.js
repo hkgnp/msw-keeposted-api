@@ -254,7 +254,15 @@ let main = async () => {
       await db.collection('post-details').removeOne({
         _id: ObjectId(id),
       });
+
+      await db.collection('media').removeOne({
+        postId: id,
+      });
+
       res.status(200);
+      res.send({
+        message: 'Deleted successfully.',
+      });
     } catch (e) {
       res.status(500);
       res.send({
