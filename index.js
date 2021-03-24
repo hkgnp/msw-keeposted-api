@@ -254,9 +254,6 @@ let main = async () => {
       await db.collection('post-details').removeOne({
         _id: ObjectId(id),
       });
-      await db.collection('media').removeOne({
-        postId: ObjectId(id),
-      });
       res.status(200);
     } catch (e) {
       res.status(500);
